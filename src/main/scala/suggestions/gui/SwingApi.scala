@@ -43,35 +43,35 @@ trait SwingApi {
   }
 
   implicit class TextFieldOps(field: TextField) {
-
-    private val res = PublishSubject[String](field.text)
-    field.subscribe {
-      case ValueChanged(f) => res.onNext(f.text)
-      case _ => {}
-    }
-
     /** Returns a stream of text field values entered in the given text field.
       *
       * @return   an observable with a stream of text field updates
       */
-    def textValues: Observable[String] = res
-
+    def textValues: Observable[String] = {
+      val res = PublishSubject[String](field.text)
+      val r: Reaction = {
+        case ValueChanged(f) => res.onNext(f.text)
+        case _ => {}
+      }
+      field.subscribe(r)
+      res
+    }
   }
 
   implicit class ButtonOps(button: Button) {
-
-    private val res = PublishSubject[Button](button)
-    button.subscribe {
-      case ButtonClicked(b) => res.onNext(b)
-      case _ => {}
-    }
-
     /** Returns a stream of button clicks.
       *
       * @return   an observable with a stream of buttons that have been clicked
       */
-    def clicks: Observable[Button] = res
-
+    def clicks: Observable[Button] = {
+      val res = PublishSubject[Button](button)
+      val r: Reaction = {
+        case ButtonClicked(b) => res.onNext(b)
+        case _ => {}
+      }
+      button.subscribe(r)
+      res
+    }
   }
 
 }
