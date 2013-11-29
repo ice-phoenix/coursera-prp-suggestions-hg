@@ -8,7 +8,7 @@ import scala.util.Failure
 import java.lang.Throwable
 import rx.lang.scala.Observable
 import rx.lang.scala.Scheduler
-import rx.lang.scala.subjects.AsyncSubject
+import rx.lang.scala.subjects.ReplaySubject
 
 object ObservableEx {
 
@@ -19,7 +19,7 @@ object ObservableEx {
     * @return    an observable completed after producing the value of the future, or with an exception
     */
   def apply[T](f: Future[T])(implicit execContext: ExecutionContext): Observable[T] = {
-    val res = AsyncSubject[T]()
+    val res = ReplaySubject[T]()
     f.onSuccess { case t => res.onNext(t); res.onCompleted() }
     f.onFailure { case e => res.onError(e) }
     res
