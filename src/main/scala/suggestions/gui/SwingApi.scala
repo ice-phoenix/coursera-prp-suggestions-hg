@@ -7,7 +7,7 @@ import scala.language.reflectiveCalls
 import scala.swing.event.Event
 import scala.swing.Reactions.Reaction
 import rx.lang.scala.Observable
-import rx.lang.scala.subjects.PublishSubject
+import rx.lang.scala.subscriptions.Subscription
 
 /** Basic facilities for dealing with Swing-like components.
   *
@@ -48,13 +48,17 @@ trait SwingApi {
       * @return   an observable with a stream of text field updates
       */
     def textValues: Observable[String] = {
-      val res = PublishSubject[String](field.text)
-      val r: Reaction = {
-        case ValueChanged(f) => res.onNext(f.text)
-        case _ => {}
+      Observable {
+        obs =>
+          val r: Reaction = {
+            case ValueChanged(f) => obs.onNext(f.text)
+            case _ => {}
+          }
+          field.subscribe(r)
+          Subscription {
+            field.unsubscribe(r)
+          }
       }
-      field.subscribe(r)
-      res
     }
   }
 
@@ -64,13 +68,17 @@ trait SwingApi {
       * @return   an observable with a stream of buttons that have been clicked
       */
     def clicks: Observable[Button] = {
-      val res = PublishSubject[Button](button)
-      val r: Reaction = {
-        case ButtonClicked(b) => res.onNext(b)
-        case _ => {}
+      Observable {
+        obs =>
+          val r: Reaction = {
+            case ButtonClicked(b) => obs.onNext(b)
+            case _ => {}
+          }
+          button.subscribe(r)
+          Subscription {
+            button.unsubscribe(r)
+          }
       }
-      button.subscribe(r)
-      res
     }
   }
 
